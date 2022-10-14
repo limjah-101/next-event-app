@@ -1,13 +1,28 @@
 import Link from 'next/link'
 import Layout from "@/components/Layout";
+import { API_URL } from 'config';
+import EventItem from '@/components/EventItem';
 
-export default function HomePage() {
+export default function HomePage({events}) {
     return (
         <Layout>           
             <main>
-                <h1>Home page</h1>
-                <Link href={'/about'}>about page</Link>
+                {events.data.map((evt, i) => {
+                    return(
+                        <EventItem key={i} evt={evt}/>
+                    )
+                })}
             </main>
         </Layout>
     );
+}
+
+export async function getStaticProps() {
+    const res = await fetch(`${API_URL}?populate=*`)
+    const events = await res.json()
+   
+    return {
+        props: { events },
+        revalidate: 1
+    }
 }

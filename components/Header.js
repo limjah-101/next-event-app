@@ -10,6 +10,7 @@ export default function Header() {
                 </div>
                 <ul className={styles.nav_center__links}>
                     <li><Link href="/about">About</Link></li>
+                    <li><Link href="/events/add">Add event</Link></li>
                     <li><Link href="/about">Sign In</Link></li>
                 </ul>
             </div>

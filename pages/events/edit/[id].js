@@ -1,23 +1,32 @@
 //import { parseCookies } from "@/helpers/index";
+import moment from "moment";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import Modal from "@/components/Modal";
 import { API_URL } from "config";
-import styles from "../../styles/EventAdd.module.scss";
+import styles from "../../../styles/EventAdd.module.scss";
+import Image from "next/image";
 
-export default function AddEventPage({ token }) {
+export default function EditEventPage({ evt }) {
     const [values, setValues] = useState({
-        name: "",
-        performers: "",
-        venue: "",
-        address: "",
-        date: "",
-        time: "",
-        description: "",
+        name: evt.attributes.name,
+        performers: evt.attributes.performers,
+        venue: evt.attributes.venue,
+        address: evt.attributes.address,
+        date: evt.attributes.date,
+        time: evt.attributes.time,
+        description: evt.attributes.description,
     });
+    const [showModal, setShowModal] = useState(false);
+    const [imgPrev, setImgPrev] = useState(
+        evt.attributes.image.data !== null
+            ? evt.attributes.image.data.attributes.formats.thumbnail.url
+            : null
+    );
 
     const router = useRouter();
 
@@ -34,13 +43,13 @@ export default function AddEventPage({ token }) {
             toast.error("Please fill in all fields");
         }
 
-        const res = await fetch(`${API_URL}`, {
-            method: "POST",
+        const res = await fetch(`${API_URL}/${evt.id}`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 //Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({data: values}),
+            body: JSON.stringify({ data: values }),
         });
 
         if (!res.ok) {
@@ -63,8 +72,8 @@ export default function AddEventPage({ token }) {
 
     return (
         <Layout title="Add New Event">
-            <Link href="/events">Go Back</Link>
-            <h1>Add Event</h1>
+            <Link href="/">Go Back</Link>
+            <h1>Edit Event</h1>
             <ToastContainer />
             <form onSubmit={handleSubmit} className={styles.form}>
                 <div className={styles.grid}>
@@ -114,7 +123,7 @@ export default function AddEventPage({ token }) {
                             type="date"
                             name="date"
                             id="date"
-                            value={values.date}
+                            value={moment(values.date).format("YYYY-MM-DD")}
                             onChange={handleInputChange}
                         />
                     </div>
@@ -141,18 +150,34 @@ export default function AddEventPage({ token }) {
                     ></textarea>
                 </div>
 
-                <input type="submit" value="Add Event" className="btn" />
+                <input type="submit" value="Edit Event" className="btn" />
             </form>
+
+            {imgPrev ? (
+                <Image src={imgPrev} width={300} height={200} />
+            ) : (
+                <div>
+                    <p>No image uploaded.</p>
+                </div>
+            )}
+
+            <div>
+                <button onClick={() => setShowModal(true)}>Add image</button>
+            </div>
+
+            <Modal show={showModal} onClose={() => setShowModal(false)}>
+                Image Upload
+            </Modal>
         </Layout>
     );
 }
 
-// export async function getServerSideProps({ req }) {
-//     const { token } = parseCookies(req);
-
-//     return {
-//         props: {
-//             token,
-//         },
-//     };
-// }
+export async function getServerSideProps({ params: { id } }) {
+    const res = await fetch(`${API_URL}/${id}?populate=*`);
+    const evt = await res.json();
+    return {
+        props: {
+            evt: evt.data,
+        },
+    };
+}
