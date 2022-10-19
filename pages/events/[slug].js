@@ -62,13 +62,43 @@ export default function EventPage({ evt }) {
     );
 }
 
-export async function getServerSideProps({ query: { slug } }) {
-    const res = await fetch(`${API_URL}?filters[slug][$eq]=${slug}&populate=*`);
+// export async function getServerSideProps({ query: { slug } }) {
+//     const res = await fetch(`${API_URL}/events?filters[slug][$eq]=${slug}&populate=*`);
+//     const event = await res.json();
+//     console.log(event);
+//     return {
+//         props: {
+//             evt: event.data[0],
+//         },
+//     };
+// }
+
+// =========== generate static page
+export async function getStaticPaths() {
+    const res = await fetch(`${API_URL}/events?&populate=*`);
+    const events = await res.json();
+    const paths = events.data.map((evt) => ({
+        params: {
+            slug: evt.attributes.slug,
+        },
+    }));
+
+    return {
+        paths,
+        fallback: false,
+    };
+}
+
+export async function getStaticProps({ params: { slug } }) {
+    const res = await fetch(
+        `${API_URL}/events?filters[slug][$eq]=${slug}&populate=*`
+    );
     const event = await res.json();
     console.log(event);
     return {
         props: {
             evt: event.data[0],
+            revalidate: 1,
         },
     };
 }

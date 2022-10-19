@@ -44,7 +44,7 @@ export default function EditEventPage({ evt }) {
             toast.error("Please fill in all fields");
         }
 
-        const res = await fetch(`${API_URL}/${evt.id}`, {
+        const res = await fetch(`${API_URL}/events/${evt.id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export default function EditEventPage({ evt }) {
     };
 
     const imageUploaded = async () => {
-        const res = await fetch(`${API_URL}/${evt.id}?populate=*`);
+        const res = await fetch(`${API_URL}/events/${evt.id}?populate=*`);
         const data = await res.json();
         setImgPrev(
             data.data.attributes.image.data.attributes.formats.thumbnail.url
@@ -184,7 +184,7 @@ export default function EditEventPage({ evt }) {
 }
 
 export async function getServerSideProps({ params: { id } }) {
-    const res = await fetch(`${API_URL}/${id}?populate=*`);
+    const res = await fetch(`${API_URL}/events/${id}?populate=*`);
     const evt = await res.json();
     return {
         props: {

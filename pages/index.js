@@ -18,7 +18,7 @@ export default function HomePage({events}) {
 }
 
 export async function getStaticProps() {
-    const res = await fetch(`${API_URL}?populate=*`)
+    const res = await fetch(`${API_URL}/events?populate=*`)
     const events = await res.json()
    
     return {
